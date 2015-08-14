@@ -17,4 +17,6 @@ gffread -E Drosophila_melanogaster.BDGP6.26.gff3 -T -o dmel_geneset-r6.26.gtf
 sed -i 's/transcript://g' dmel_geneset-r6.26.gtf
 sed -i 's/gene://g' dmel_geneset-r6.26.gtf
 
+# only using the first 20000 entries to prevent this repo from becoming absurdly large
+head -n 20000 dmel_geneset-r6.26.gtf > dmel_geneset_abridged-r6.26.gtf
 # All done! We have our starting GTF.

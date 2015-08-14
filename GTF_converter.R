@@ -30,7 +30,7 @@
 # Ensembl Metazoa using the getGTF.sh script in this repo.
 
 # load a .gtf as a dataframe... 
-gtf <- read.delim("dmel_geneset-r6.26.gtf",
+gtf <- read.delim("dmel_geneset_abridged-r6.26.gtf",
                   header = FALSE, as.is = TRUE, quote = "")
 # we have to use the 'quote = ""' bit or R will get rid of our quotation marks
 # automatically, which sucks.

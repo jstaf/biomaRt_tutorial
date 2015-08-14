@@ -1,5 +1,6 @@
-*.gtf
 *.gff3
 *.Rhistory
 *.Rproj.user/
-
+*.fa
+fasta_seqs/
+.Rproj.user
