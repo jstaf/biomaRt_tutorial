@@ -66,6 +66,8 @@ replacement <- martData$flybasename_gene[idx]
 head(replacement)
 notNA <- which(!is.na(replacement))
 metadata[notNA, 4] <- replacement[notNA]
+# now we can see that the data is fixed
+head(metadata)
 
 # okay now put everything back together and export, remember that we need those quotation marks!
 quotes <- rep("\"", length(metadata[, 1]))

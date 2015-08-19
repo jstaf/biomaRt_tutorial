@@ -38,7 +38,7 @@ head(attributes)
 # Here's a random list of Drosophila genes. I've only heard of one of them
 # before, and have no idea what most of the others do. Lets find out!
 geneList <- read.csv("gene_list.csv")
-geneList <- geneList[,2]
+geneList <- as.character(geneList[,2])
 
 # getBM() is the workhorse for biomaRt and is used to retrieve data.
 
@@ -59,7 +59,7 @@ martData <- getBM(attributes = c("ensembl_gene_id", # FBgn#, highly specific ide
 # got all of the data back, but there are multiple entries for items when we
 # retrieved multiple values for an gene (like for GO terms)
 str(martData) 
-length(unique(martData$flybasename_gene)) # we found data for all 20 genes
+length(unique(martData$flybasename_gene)) # we found data for all 10 genes
 
 # A lot to take in, isn't it?
 
@@ -73,11 +73,11 @@ GTPases <- getBM(attributes = c("ensembl_gene_id", "flybasename_gene", "go_id"),
 # This should be every annotated GTPase in the Drosophila genome
 head(GTPases)
 
-# What if we wanted the transcript nucleotide sequence for every transcript from
+# What if we wanted the genomic nucleotide sequence for every transcript from
 # our list of genes?
-seqs <- getSequence(id = geneList, # same as values from getBM()
+seqs <- getSequence(id = geneList[1], # same as values from getBM(), you can search multiple at a time, but were doing only 1 here as a demo
                     type = "flybasename_gene", # same as filters
-                    seqType = "transcript_exon", 
+                    seqType = "transcript_exon_intron", 
                     mart = ensembl)
 # Notice that once again, we've retrieved multiple entries for each gene, how do
 # we know what sequence corresponds to what transcript?
@@ -122,10 +122,38 @@ dir.create("fasta_seqs")
 
 makeFASTA <- function(gene) {
   filename <- paste("fasta_seqs/", gene, ".fa", sep = "")
+  # Get list of transcripts from our gene
   trans <- subset(transcripts$flybase_transcript_id, transcripts$flybasename_gene == gene)
+  # Select the subset of transcripts that match our transcript ids
   sequences <- subset(seqs, seqs$flybase_transcript_id %in% trans)
   exportFASTA(sequences, filename)
   return(paste("Exporting", gene))
 }
 # now lets run this across all genes
 lapply(unique(transcripts$flybasename_gene), makeFASTA)
+
+# What if we need archived information (old annotations, etc.)?
+# The "archive = TRUE" argument lets us access them!
+head(listMarts(archive = TRUE))
+
+# If you want other marts not listed, read the biomaRt manual at and it has
+# another option for you: 
+# http://www.bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.pdf
+
+# You can use an archived mart in the same way that you'd use a normal mart.
+# Just remember to use archive = TRUE for the useMart() function.
+oldMart <- useMart("ensembl_mart_47", archive = TRUE)
+head(listDatasets(oldMart))
+
+# One word of warning- you can only retrieve data from one "page" of a biomaRt 
+# database at a time for bigger databases. If your query fails, check to make
+# sure the attributes you're interested in come from the same page.
+
+# You can see the possible pages with:
+attributePages(ensembl)
+
+# To look at the attributes from a given page:
+head(listAttributes(ensembl, page = "snp"))
+
+# What if you want to retrieve attributes from multiple pages? You need to make
+# multiple queries and merge them in R later (using the match() function).
